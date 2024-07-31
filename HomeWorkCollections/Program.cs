@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace HomeWorkCollections
 {
@@ -82,20 +83,24 @@ namespace HomeWorkCollections
 
 
 		//Класс ObservableCollection
-		public static void ObservableCollectionExample()
+		public static void People_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
 		{
-			ObservableCollection<string> items = new ObservableCollection<string>();
-			items.Add("Item 1");
-			items.Add("Item 2");
-
-			items.CollectionChanged += (sender, e) =>
+			switch (e.Action)
 			{
-				Console.WriteLine($"Коллекция изменилась: {e.Action}");
-			};
-
-			items.Add("Item 3");
-
-			items.RemoveAt(1);
+				case NotifyCollectionChangedAction.Add: // если добавление
+					if (e.NewItems?[0] is Person newPerson)
+						Console.WriteLine($"Добавлен новый объект: {newPerson.Name}");
+					break;
+				case NotifyCollectionChangedAction.Remove: // если удаление
+					if (e.OldItems?[0] is Person oldPerson)
+						Console.WriteLine($"Удален объект: {oldPerson.Name}");
+					break;
+				case NotifyCollectionChangedAction.Replace: // если замена
+					if ((e.NewItems?[0] is Person replacingPerson) &&
+						(e.OldItems?[0] is Person replacedPerson))
+						Console.WriteLine($"Объект {replacedPerson.Name} заменен объектом {replacingPerson.Name}");
+					break;
+			}
 		}
 
 
@@ -149,7 +154,25 @@ namespace HomeWorkCollections
 
 			//Класс ObservableCollection
 			Console.WriteLine("--------------------Класс ObservableCollection");
-			ObservableCollectionExample();
+			var people1 = new ObservableCollection<Person>()
+			{
+				new Person("Tom"),
+	            new Person("Sam")
+			};
+
+			// подписываемся на событие изменения коллекции
+			people1.CollectionChanged += People_CollectionChanged;
+
+			people1.Add(new Person("Bob"));  // добавляем новый элемент
+
+			people1.RemoveAt(1);                 // удаляем элемент
+			people1[0] = new Person("Eugene");   // заменяем элемент
+
+			Console.WriteLine("\nСписок пользователей:");
+			foreach (var person in people1)
+			{
+				Console.WriteLine(person.Name);
+			}
 
 
 			//Интерфейсы IEnumerable и IEnumerator
@@ -170,11 +193,60 @@ namespace HomeWorkCollections
 			Console.WriteLine("--------------------Класс Array и массивы");
 			string[] people = { "Tom", "Sam", "Bob", "Kate", "Tom", "Alice" };
 
-			// сортируем с 1 индекса 3 элемента
 			Array.Sort(people, 1, 3);
+
+			Console.WriteLine("===Sort===");
+			foreach (var person in people)
+				Console.Write($"{person} ");
+			
+			Console.WriteLine("\n===Copy===");
+			var employees = new string[4];
+
+			Array.Copy(people, 1, employees, 0, 4);
+			foreach (var person in employees)
+				Console.Write($"{person} ");
+
+			Console.WriteLine("\n===Resize===");
+			Array.Resize(ref people, 2);
 
 			foreach (var person in people)
 				Console.Write($"{person} ");
+
+			Console.WriteLine("\n===Reverse===");
+			Array.Reverse(people);
+			foreach (var person in people)
+				Console.Write($"{person} ");
+
+			Console.WriteLine("\n===IndexOf===");
+			int[] nums = { 2, 5, 8, 1, 9, 4 };
+			int number = 9;
+			int index = Array.IndexOf(nums, number);
+
+			foreach(var num in nums)
+			{
+				Console.Write($"{num} ");
+			}
+
+			if (index != -1)
+			{
+				Console.WriteLine($"\nИндекс элемента {number} равен {index}");
+			}
+			else
+			{
+				Console.WriteLine($"Элемент {number} не найден в массиве");
+			}
+
+			Console.WriteLine("===Array.Find===");
+			int evenNumber = Array.Find(nums, n => n % 2 == 0);
+
+			if (evenNumber != 0)
+			{
+				Console.WriteLine($"Первое четное число в массиве: {evenNumber}");
+			}
+			else
+			{
+				Console.WriteLine("В массиве нет четных чисел");
+			}
 		}
 	}
 }
